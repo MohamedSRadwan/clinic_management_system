@@ -7,12 +7,12 @@
 #define MAX_SIZE 10
 
 
-//TODO: importing data from files
+
 typedef struct doctor {
     char name[20];
     char address[20];
     char specialty[20];
-    int visita;
+    char visita[];
 }doctor;
 
 struct doctors {
@@ -22,11 +22,43 @@ typedef struct patient {
     char name[20];
     char username[20];
     char password[20];
+    bool signed_in;
 }patient;
 struct patients {
     patient arr[MAX_SIZE];
 };
+//TODO: importing data from files
+bool import_users_data(struct patients p) {
+    FILE *fp;
+    fp = fopen("users database.txt", "r");
+    if (fp == NULL) {
+        printf("Error opening file\n");
+        return false;
+    }
+    //TODO: loop through the patients in file to extract data.... problem in determining the number of iterations
+}
+bool import_data(struct doctors p) {
+    FILE *fp;
+    fp = fopen("doctors database.txt", "r");
+    if (fp == NULL) {
+        printf("Error opening file\n");
+        return false;
+    }
+    for (int i = 0; i < MAX_SIZE; i++) {
+        fscanf(fp,
+            "%[^\t]\t%[^\t]\t%[^t]\t%[^\n]%*c",
+            p.arr[i].name, p.arr[i].address, p.arr[i].specialty, p.arr[i].visita);
+    }
+    fclose(fp);
+    return true;
+}
 
+//DONE: erasing file data
+void erase_file() {
+    FILE *fp;
+    fp = fopen("users database.txt", "w");
+    fclose(fp);
+}
 
 bool is_word(char word[]) {
     int len = strlen(word);
@@ -47,6 +79,7 @@ void print_main_menu() {
 }
 
 //TODO: printing menu
+//TODO: the functionalities here
 void print_menu() {
 
     printf("\033[2J\033[H");
@@ -78,10 +111,17 @@ bool correct_password(char username[], char password[], struct patients p) {
     }
     return correct;
 }
+int index_of_patient (char username[], struct patients p) {
+    for (int i = 0; i < MAX_SIZE; i++) {
+        if (strcmp(p.arr[i].username, username) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
 
-//TODO: sign up
-bool sign_up() {
-    printf("\033[2J\033[H");
+//DONE: sign up
+bool sign_up(struct patients p) {
     printf("Enter your full name: ");
     char full_name[50];
     do {
@@ -89,46 +129,82 @@ bool sign_up() {
     } while (!is_word(full_name));
     printf("Enter your username: ");
     char username[50];
+    bool tried = false;
     do {
+        if (tried) {
+            printf("This username already exists. TRY AGAIN: ");
+        }
         scanf("%s%*c", username);
-    } while (!is_word(username) || username_exists(username, patients));
+
+        tried = true;
+    } while (username_exists(username, p));
     printf("Enter your password: ");
     char password1[50];
     scanf("%s%*c", password1);
     printf("ReEnter your password: ");
     char password2[50];
-    scanf("%s%*c", password2);
-    if (strcmp(password1, password2) != 0) {
-        return false;
-    }
+    tried = false;
+    do {
+        if (tried) {
+            printf("The two passwords don't match, try again: ");
+        }
+        scanf("%s%*c", password2);
+
+        tried = true;
+    } while (strcmp(password1, password2) != 0);
+
 
     //check if username exists: done while taking input
 
-    //TODO: write to file
-
+    //DONE: write to file
+    FILE *fp;
+    fp = fopen("users database.txt", "a");
+    if (fp == NULL) {
+        printf("Unable to open file");
+        return false;
+    }
+    fprintf(fp, "%s\t%s\t%s\n", full_name, username, password1);
+    fclose(fp);
     return true;
 }
-//TODO: log in
-bool log_in() {
-    printf("\033[2J\033[H");
+//DONE: log in
+bool log_in(struct patients p) {
     printf("Enter your username: ");
     char username[50];
+    bool tried = false;
     do {
-        scanf("%s%*c", username);
-    } while (!is_word(username) || username_exists(username, patients));
+        if (tried) {
+            printf("Unable to find this username, make sure it is written correctly: ");
+        }
+        scanf("%[^\n]%*c", username);
+
+        tried = true;
+    } while (username_exists(username, p));
 
 
     printf("Enter your password: ");
     char password[50];
+    tried = false;
     do {
-        scanf("%s%*c", password);
-    } while(!correct_password(username, password, patients));
+        if (tried) {
+            printf("Wrong password, try again: ");
+        }
+        scanf("%[^\n]%*c", password);
+
+        tried = true;
+    } while(!correct_password(username, password, p));
 
     //check if username exists: done while taking input
 
     //check if password is correct: done while taking input
 
+    //flag the user as logged in
+    int idx = index_of_patient(username, p);
+    p.arr[idx].signed_in = true;
+    return true;
 }
+
+
 //TODO: printing doctors data
 
 //read from file
@@ -141,42 +217,44 @@ void clrscr()
 }
 
 int main() {
-    //print main menu
-    // print_main_menu();
-    // char op;
-    // do {
-    //     scanf("%c%*c", &op);
-    // } while (op < '0' || op > '3');
-    // switch (op) {
-    //     case '1':
-    //         sign_up();
-    //         break;
-    //     case '2':
-    //         log_in();
-    //         break;
-    //     case '3':
-    //
-    //         break;
-    //     default:
-    //         break;
-    // }
-    //clearing screen test: all three working on vs code but not clion 😢
+    struct doctors doctors;
+    struct patients patients;
 
-    printf("heelo");
+    if(!import_data(doctors)) {
+        printf("Error importing data\n");
+
+    }
+    //print main menu
+    print_main_menu();
+    char op;
+    do {
+        scanf("%c%*c", &op);
+    } while (op < '0' || op > '3');
+
+    //TODO: after logging in , show menu
+    switch (op) {
+        case '1':
+            sign_up(patients);
+            break;
+        case '2':
+            if(log_in(patients)) {
+                printf("Logged in\n");
+            }
+            break;
+        //TODO: case 3 if exists
+        case '3':
+
+            break;
+        default:
+            break;
+    }
+    //add functionality here
+
+
+//clearing screen test: all three working on vs code but not clion 😢
+// printf("heelo");
     // printf("\033[2J\033[H");
     // system("cls");
-    clrscr();
-    printf("hai");
-    // FILE *fp;
-    // fp = fopen("users database.txt", "w");
-    // if (fp == NULL) {
-    //     printf("Error opening file");
-    //     return 1;
-    // }
-    // char text[2000] = "";
-    // fprintf(fp, "%s\n", text);
-
-    //take operation sign up or log in
-
-
+    // clrscr();
+    // printf("hai");
 }
