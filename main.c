@@ -12,7 +12,7 @@ typedef struct doctor {
     char name[20];
     char address[20];
     char specialty[20];
-    char visita[];
+    char visita[20];
 }doctor;
 
 struct doctors {
@@ -22,22 +22,33 @@ typedef struct patient {
     char name[20];
     char username[20];
     char password[20];
-    bool signed_in;
 }patient;
 struct patients {
     patient arr[MAX_SIZE];
+    int number_of_patients;
 };
 //TODO: importing data from files
-bool import_users_data(struct patients p) {
+bool import_users_data(struct patients *p) {
     FILE *fp;
     fp = fopen("users database.txt", "r");
     if (fp == NULL) {
         printf("Error opening file\n");
         return false;
     }
-    //TODO: loop through the patients in file to extract data.... problem in determining the number of iterations
+    fscanf(fp, "%d%*c", &p->number_of_patients);
+    for (int i = 0; i < p->number_of_patients; i++) {
+        if(fscanf(fp,
+            "%[^\n]\t[^\n]\t[^\n]%*c",
+            p->arr[i].name, p->arr[i].username, p->arr[i].password) != 3) {
+            printf("Error reading data\n");
+            return false;
+        }
+    }
+    fclose(fp);
+    //DONE: loop through the patients in file to extract data.... problem in determining the number of iterations
+    return true;
 }
-bool import_data(struct doctors p) {
+bool import_data(struct doctors *p) {
     FILE *fp;
     fp = fopen("doctors database.txt", "r");
     if (fp == NULL) {
@@ -47,7 +58,7 @@ bool import_data(struct doctors p) {
     for (int i = 0; i < MAX_SIZE; i++) {
         fscanf(fp,
             "%[^\t]\t%[^\t]\t%[^t]\t%[^\n]%*c",
-            p.arr[i].name, p.arr[i].address, p.arr[i].specialty, p.arr[i].visita);
+            p->arr[i].name, p->arr[i].address, p->arr[i].specialty, p->arr[i].visita);
     }
     fclose(fp);
     return true;
@@ -57,6 +68,7 @@ bool import_data(struct doctors p) {
 void erase_file() {
     FILE *fp;
     fp = fopen("users database.txt", "w");
+    fprintf(fp, "%d\n", 0);
     fclose(fp);
 }
 
@@ -92,7 +104,7 @@ void print_menu() {
 //DONE: check if username exists
 bool username_exists(char username[], struct patients p) {
     bool exists = false;
-    for (int i = 0; i < MAX_SIZE; i++) {
+    for (int i = 0; i < p.number_of_patients; i++) {
         if (strcmp(p.arr[i].username, username) == 0) {
             exists = true;
         }
@@ -124,12 +136,17 @@ int index_of_patient (char username[], struct patients p) {
 bool sign_up(struct patients p) {
     printf("Enter your full name: ");
     char full_name[50];
+    bool tried = false;
     do {
+        if (tried) {
+            printf("your name shouldn't include special characters");
+        }
         scanf("%[^\n]%*c", full_name);
+        tried = true;
     } while (!is_word(full_name));
     printf("Enter your username: ");
     char username[50];
-    bool tried = false;
+    tried = false;
     do {
         if (tried) {
             printf("This username already exists. TRY AGAIN: ");
@@ -157,7 +174,19 @@ bool sign_up(struct patients p) {
     //check if username exists: done while taking input
 
     //DONE: write to file
+    //FIXME: doesn't add
+    //add 1 to current number of patients
     FILE *fp;
+    fp = fopen("users database.txt", "r+");
+    if (fp == NULL) {
+        printf("Error opening file\n");
+        return false;
+    }
+    int number_of_patients;
+    fscanf(fp, "%d%*c", &number_of_patients);
+    fprintf(fp, "%d\n", ++number_of_patients);
+    fclose(fp);
+
     fp = fopen("users database.txt", "a");
     if (fp == NULL) {
         printf("Unable to open file");
@@ -179,7 +208,7 @@ bool log_in(struct patients p) {
         scanf("%[^\n]%*c", username);
 
         tried = true;
-    } while (username_exists(username, p));
+    } while (!username_exists(username, p));
 
 
     printf("Enter your password: ");
@@ -198,15 +227,17 @@ bool log_in(struct patients p) {
 
     //check if password is correct: done while taking input
 
-    //flag the user as logged in
-    int idx = index_of_patient(username, p);
-    p.arr[idx].signed_in = true;
+
     return true;
 }
 
 
 //TODO: printing doctors data
-
+void print_all_doctors(struct doctors p) {
+    for (int i = 0; i < MAX_SIZE; i++) {
+        printf("%s\t%s\t%s\n", p.arr[i].name, p.arr[i].address, p.arr[i].specialty);
+    }
+}
 //read from file
 
 
@@ -217,13 +248,16 @@ void clrscr()
 }
 
 int main() {
+    //erase_file();
     struct doctors doctors;
     struct patients patients;
-
-    if(!import_data(doctors)) {
+    if(!import_data(&doctors)) {
         printf("Error importing data\n");
-
     }
+    if(!import_users_data(&patients)) {
+        printf("Error importing data\n");
+    }
+    print_all_doctors(doctors);
     //print main menu
     print_main_menu();
     char op;
@@ -248,7 +282,7 @@ int main() {
         default:
             break;
     }
-    //add functionality here
+    //TODO: add functionality here
 
 
 //clearing screen test: all three working on vs code but not clion 😢
