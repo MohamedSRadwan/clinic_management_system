@@ -36,10 +36,10 @@ bool import_users_data(struct patients *p) {
         printf("Error opening file\n");
         return false;
     }
-    fscanf(fp, "%d%*c", &p->number_of_patients);
+    fscanf(fp, "%d%*c", &(p->number_of_patients));
     for (int i = 0; i < p->number_of_patients; i++) {
         if(fscanf(fp,
-            "%[^\n]\t[^\n]\t[^\n]%*c",
+            "%[^\t]\t%[^\t]\t%[^\n]%*c",
             p->arr[i].name, p->arr[i].username, p->arr[i].password) != 3) {
             printf("Error reading data\n");
             return false;
@@ -136,7 +136,7 @@ int index_of_patient (char username[], struct patients p) {
 //DONE: sign up
 bool sign_up(struct patients p) {
     printf("Enter your full name: ");
-    char full_name[50];
+    char full_name[CHAR_SIZE];
     bool tried = false;
     do {
         if (tried) {
@@ -146,7 +146,7 @@ bool sign_up(struct patients p) {
         tried = true;
     } while (!is_word(full_name));
     printf("Enter your username: ");
-    char username[50];
+    char username[CHAR_SIZE];
     tried = false;
     do {
         if (tried) {
@@ -157,10 +157,10 @@ bool sign_up(struct patients p) {
         tried = true;
     } while (username_exists(username, p));
     printf("Enter your password: ");
-    char password1[50];
+    char password1[CHAR_SIZE];
     scanf("%s%*c", password1);
     printf("ReEnter your password: ");
-    char password2[50];
+    char password2[CHAR_SIZE];
     tried = false;
     do {
         if (tried) {
@@ -185,14 +185,10 @@ bool sign_up(struct patients p) {
     }
     int number_of_patients;
     fscanf(fp, "%d%*c", &number_of_patients);
+    rewind(fp);
     fprintf(fp, "%d\n", ++number_of_patients);
-    fclose(fp);
+    fseek(fp, 0, SEEK_END);
 
-    fp = fopen("users database.txt", "a");
-    if (fp == NULL) {
-        printf("Unable to open file");
-        return false;
-    }
     fprintf(fp, "%s\t%s\t%s\n", full_name, username, password1);
     fclose(fp);
     return true;
@@ -200,7 +196,7 @@ bool sign_up(struct patients p) {
 //DONE: log in
 bool log_in(struct patients p) {
     printf("Enter your username: ");
-    char username[50];
+    char username[CHAR_SIZE];
     bool tried = false;
     do {
         if (tried) {
@@ -213,7 +209,7 @@ bool log_in(struct patients p) {
 
 
     printf("Enter your password: ");
-    char password[50];
+    char password[CHAR_SIZE];
     tried = false;
     do {
         if (tried) {
@@ -233,13 +229,18 @@ bool log_in(struct patients p) {
 }
 
 
-//TODO: printing doctors data
+//DONE: printing doctors data
 void print_all_doctors(struct doctors p) {
     for (int i = 0; i < MAX_SIZE; i++) {
         printf("%s\t%s\t%s\t%s\n", p.arr[i].name, p.arr[i].address, p.arr[i].specialty, p.arr[i].visita);
     }
 }
-//read from file
+
+void print_all_patients(struct patients p) {
+    for (int i = 0; i < p.number_of_patients; i++) {
+        printf("%s\t%s\t%s\n", p.arr[i].name, p.arr[i].username, p.arr[i].password);
+    }
+}
 
 
 //clear screen function
@@ -259,6 +260,7 @@ int main() {
         printf("Error importing data\n");
     }
     print_all_doctors(doctors);
+    print_all_patients(patients);
     //print main menu
     print_main_menu();
     char op;
