@@ -5,23 +5,24 @@
 #include <ctype.h>
 
 #define MAX_SIZE 10
+#define CHAR_SIZE 50
 
 
 
 typedef struct doctor {
-    char name[20];
-    char address[20];
-    char specialty[20];
-    char visita[20];
+    char name[CHAR_SIZE];
+    char address[CHAR_SIZE];
+    char specialty[CHAR_SIZE];
+    char visita[CHAR_SIZE];
 }doctor;
 
 struct doctors {
     doctor arr[MAX_SIZE];
 };
 typedef struct patient {
-    char name[20];
-    char username[20];
-    char password[20];
+    char name[CHAR_SIZE];
+    char username[CHAR_SIZE];
+    char password[CHAR_SIZE];
 }patient;
 struct patients {
     patient arr[MAX_SIZE];
@@ -57,7 +58,7 @@ bool import_data(struct doctors *p) {
     }
     for (int i = 0; i < MAX_SIZE; i++) {
         fscanf(fp,
-            "%[^\t]\t%[^\t]\t%[^t]\t%[^\n]%*c",
+            "%[^\t]\t%[^\t]\t%[^\t]\t%[^\n]%*c",
             p->arr[i].name, p->arr[i].address, p->arr[i].specialty, p->arr[i].visita);
     }
     fclose(fp);
@@ -235,7 +236,7 @@ bool log_in(struct patients p) {
 //TODO: printing doctors data
 void print_all_doctors(struct doctors p) {
     for (int i = 0; i < MAX_SIZE; i++) {
-        printf("%s\t%s\t%s\n", p.arr[i].name, p.arr[i].address, p.arr[i].specialty);
+        printf("%s\t%s\t%s\t%s\n", p.arr[i].name, p.arr[i].address, p.arr[i].specialty, p.arr[i].visita);
     }
 }
 //read from file
