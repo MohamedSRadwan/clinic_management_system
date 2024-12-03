@@ -83,23 +83,64 @@ bool is_word(char word[]) {
     return true;
 }
 
-//TODO: printing the main menu
+//DONE: printing the main menu
 void print_main_menu() {
+
+    system("cls");
     printf("\033[2J\033[H");
     printf("enter the number corresponding to the required operation: \n");
     printf("1. Sign up\n"
            "2. Log in\n");
 }
 
-//TODO: printing menu
+//DONE: printing menu
+
+
+
+
+
 //TODO: the functionalities here
+bool available_speciality(char speciality[], struct doctors p) {
+    bool correct = false;
+    for (int i = 0; i < MAX_SIZE; i++) {
+        if (strcmp(p.arr[i].specialty, speciality) == 0) {
+            correct = true;
+        }
+    }
+    return correct;
+}
+
+void search_speciality(struct doctors p) {
+    printf("Enter the required speciality: ");
+    char speciality[CHAR_SIZE];
+    bool tried = false;
+    do {
+        if (tried) {
+            printf("This speciality is not available.");
+        }
+        scanf("%[^\n]%*c", speciality);
+
+        tried = true;
+    } while(!available_speciality(speciality, p));
+    for (int i = 0; i < MAX_SIZE; i++) {
+        if(strcmp(p.arr[i].specialty, speciality) == 0){
+            printf("%s\t%s\t%s\n", p.arr[i].name, p.arr[i].address, p.arr[i].visita);
+        }
+    }
+}
+
+
+
+
+
 void print_menu() {
 
-    printf("\033[2J\033[H");
+    system("cls");
+    //printf("\033[2J\033[H");
     printf("enter the number corresponding to the required operation: \n");
     printf("1. search a specialty\n"
            "2. view all available doctors\n"
-           "3. Book an appointment");
+           "3. Book an appointment\n");
 }
 
 //DONE: check if username exists
@@ -175,7 +216,6 @@ bool sign_up(struct patients p) {
     //check if username exists: done while taking input
 
     //DONE: write to file
-    //FIXME: doesn't add
     //add 1 to current number of patients
     FILE *fp;
     fp = fopen("users database.txt", "r+");
@@ -272,10 +312,12 @@ int main() {
     switch (op) {
         case '1':
             sign_up(patients);
+            print_menu();
             break;
         case '2':
             if(log_in(patients)) {
                 printf("Logged in\n");
+                print_menu();
             }
             break;
         //TODO: case 3 if exists
@@ -285,8 +327,20 @@ int main() {
         default:
             break;
     }
-    //TODO: add functionality here
 
+    //TODO: add functionality here
+    char op2;
+    do {
+        scanf("%c%*c", &op2);
+    } while (op2 < '0' || op2 > '3');
+    switch (op2) {
+        case '1':
+            search_speciality(doctors);
+        break;
+        case '2':
+            print_all_doctors(doctors);
+        break;
+    }
 
 //clearing screen test: all three working on vs code but not clion 😢
 // printf("heelo");
