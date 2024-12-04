@@ -193,14 +193,14 @@ bool sign_up(struct patients p) {
         if (tried) {
             printf("This username already exists.\n TRY AGAIN: ");
         }
-        scanf("%49s%*c", username);
+        scanf("%49[^\n]%*c", username);
         sanitize_input(username);
         tried = true;
     } while (username_exists(username, p));
 
     printf("Enter your password: ");
     char password1[CHAR_SIZE];
-    scanf("%49s%*c", password1);
+    scanf("%49[^\n]%*c", password1);
     sanitize_input(password1);
     printf("ReEnter your password: ");
     char password2[CHAR_SIZE];
@@ -209,7 +209,7 @@ bool sign_up(struct patients p) {
         if (tried) {
             printf("The two passwords don't match, try again: ");
         }
-        scanf("%49s%*c", password2);
+        scanf("%49[^\n]%*c", password2);
         sanitize_input(password2);
         tried = true;
     } while (strcmp(password1, password2) != 0);
