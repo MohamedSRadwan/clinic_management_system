@@ -28,7 +28,7 @@ struct patients {
     patient arr[MAX_SIZE];
     int number_of_patients;
 };
-//TODO: importing data from files
+//DONE: importing data from files
 bool import_users_data(struct patients *p) {
     FILE *fp;
     fp = fopen("users database.txt", "r");
@@ -46,7 +46,7 @@ bool import_users_data(struct patients *p) {
         }
     }
     fclose(fp);
-    //DONE: loop through the patients in file to extract data.... problem in determining the number of iterations
+    //DONE: loop through the patients in file to extract data
     return true;
 }
 bool import_data(struct doctors *p) {
@@ -73,7 +73,17 @@ void erase_file() {
     fclose(fp);
 }
 
-bool is_word(char word[]) {
+
+void sanitize_input(char input[]) {
+    int len = strlen(input);
+    for (int i = 0; i < len; i++) {
+        if (input[i] == '\t' || input[i] == '\\') {
+            input[i] = ' ';
+        }
+    }
+}
+
+bool is_word(char word[]) {//the name should be free from special characters
     int len = strlen(word);
     for (int i = 0; i < len; i++) {
         if (!isalpha(word[i]) && !isspace(word[i])) {
@@ -85,25 +95,25 @@ bool is_word(char word[]) {
 
 //DONE: printing the main menu
 void print_main_menu() {
-
-    system("cls");
-    printf("\033[2J\033[H");
+    printf("\n\n\t\t\t\t\t\t\t\t******* WELCOME *******\n");
     printf("enter the number corresponding to the required operation: \n");
     printf("1. Sign up\n"
-           "2. Log in\n");
+           "2. Log in\n"
+           "3. Exit\n");
+}
+//DONE: printing menu
+void print_menu() {
+
+    printf("enter the number corresponding to the required operation: \n");
+    printf("1. search a specialty\n"
+           "2. view all available doctors\n"
+           "3. Log out\n");
 }
 
-//DONE: printing menu
-
-
-
-
-
-//TODO: the functionalities here
 bool available_speciality(char speciality[], struct doctors p) {
     bool correct = false;
     for (int i = 0; i < MAX_SIZE; i++) {
-        if (strcmp(p.arr[i].specialty, speciality) == 0) {
+        if (strcmp(strlwr(p.arr[i].specialty), strlwr(speciality)) == 0) {
             correct = true;
         }
     }
@@ -122,25 +132,13 @@ void search_speciality(struct doctors p) {
 
         tried = true;
     } while(!available_speciality(speciality, p));
+    printf("The available doctors for %s: \n", speciality);
+
     for (int i = 0; i < MAX_SIZE; i++) {
-        if(strcmp(p.arr[i].specialty, speciality) == 0){
+        if(strcmp(strlwr(p.arr[i].specialty), strlwr(speciality)) == 0){
             printf("%s\t%s\t%s\n", p.arr[i].name, p.arr[i].address, p.arr[i].visita);
         }
     }
-}
-
-
-
-
-
-void print_menu() {
-
-    system("cls");
-    //printf("\033[2J\033[H");
-    printf("enter the number corresponding to the required operation: \n");
-    printf("1. search a specialty\n"
-           "2. view all available doctors\n"
-           "3. Book an appointment\n");
 }
 
 //DONE: check if username exists
@@ -165,17 +163,16 @@ bool correct_password(char username[], char password[], struct patients p) {
     }
     return correct;
 }
-int index_of_patient (char username[], struct patients p) {
-    for (int i = 0; i < MAX_SIZE; i++) {
-        if (strcmp(p.arr[i].username, username) == 0) {
-            return i;
-        }
-    }
-    return -1;
-}
 
 //DONE: sign up
 bool sign_up(struct patients p) {
+
+    if(p.number_of_patients >= MAX_SIZE) {
+        printf("Limit exceeded. Can not sign you up");
+        return false;
+    }
+
+
     printf("Enter your full name: ");
     char full_name[CHAR_SIZE];
     bool tried = false;
@@ -183,23 +180,28 @@ bool sign_up(struct patients p) {
         if (tried) {
             printf("your name shouldn't include special characters");
         }
-        scanf("%[^\n]%*c", full_name);
+        scanf("%49[^\n]%*c", full_name);
+
+        sanitize_input(full_name);
         tried = true;
     } while (!is_word(full_name));
+
     printf("Enter your username: ");
     char username[CHAR_SIZE];
     tried = false;
     do {
         if (tried) {
-            printf("This username already exists. TRY AGAIN: ");
+            printf("This username already exists.\n TRY AGAIN: ");
         }
-        scanf("%s%*c", username);
-
+        scanf("%49s%*c", username);
+        sanitize_input(username);
         tried = true;
     } while (username_exists(username, p));
+
     printf("Enter your password: ");
     char password1[CHAR_SIZE];
-    scanf("%s%*c", password1);
+    scanf("%49s%*c", password1);
+    sanitize_input(password1);
     printf("ReEnter your password: ");
     char password2[CHAR_SIZE];
     tried = false;
@@ -207,8 +209,8 @@ bool sign_up(struct patients p) {
         if (tried) {
             printf("The two passwords don't match, try again: ");
         }
-        scanf("%s%*c", password2);
-
+        scanf("%49s%*c", password2);
+        sanitize_input(password2);
         tried = true;
     } while (strcmp(password1, password2) != 0);
 
@@ -226,7 +228,7 @@ bool sign_up(struct patients p) {
     int number_of_patients;
     fscanf(fp, "%d%*c", &number_of_patients);
     rewind(fp);
-    fprintf(fp, "%d\n", ++number_of_patients);
+    fprintf(fp, "%d", ++number_of_patients);
     fseek(fp, 0, SEEK_END);
 
     fprintf(fp, "%s\t%s\t%s\n", full_name, username, password1);
@@ -242,8 +244,8 @@ bool log_in(struct patients p) {
         if (tried) {
             printf("Unable to find this username, make sure it is written correctly: ");
         }
-        scanf("%[^\n]%*c", username);
-
+        scanf("%49[^\n]%*c", username);
+        sanitize_input(username);
         tried = true;
     } while (!username_exists(username, p));
 
@@ -255,8 +257,8 @@ bool log_in(struct patients p) {
         if (tried) {
             printf("Wrong password, try again: ");
         }
-        scanf("%[^\n]%*c", password);
-
+        scanf("%49[^\n]%*c", password);
+        sanitize_input(password);
         tried = true;
     } while(!correct_password(username, password, p));
 
@@ -271,8 +273,9 @@ bool log_in(struct patients p) {
 
 //DONE: printing doctors data
 void print_all_doctors(struct doctors p) {
+    printf("%-30s|%-30s|%-20s|%-15s\n", "doctor name", "address", "specialty", "visita");
     for (int i = 0; i < MAX_SIZE; i++) {
-        printf("%s\t%s\t%s\t%s\n", p.arr[i].name, p.arr[i].address, p.arr[i].specialty, p.arr[i].visita);
+        printf("%-30s\t%-30s\t%-20s\t%-15s\n", p.arr[i].name, p.arr[i].address, p.arr[i].specialty, p.arr[i].visita);
     }
 }
 
@@ -286,66 +289,65 @@ void print_all_patients(struct patients p) {
 //clear screen function
 void clrscr()
 {
-    system("@cls||clear");
+    system("cls||clear");
 }
 
 int main() {
     //erase_file();
-    struct doctors doctors;
-    struct patients patients;
-    if(!import_data(&doctors)) {
-        printf("Error importing data\n");
-    }
-    if(!import_users_data(&patients)) {
-        printf("Error importing data\n");
-    }
-    print_all_doctors(doctors);
-    print_all_patients(patients);
-    //print main menu
-    print_main_menu();
-    char op;
-    do {
-        scanf("%c%*c", &op);
-    } while (op < '0' || op > '3');
+    //print_all_patients(patients);
 
-    //TODO: after logging in , show menu
-    switch (op) {
-        case '1':
-            sign_up(patients);
+    bool log;
+    while(true) {
+        log = true;
+
+        struct doctors doctors;
+        struct patients patients;
+        if(!import_data(&doctors)) {
+            printf("Error importing data\n");
+        }
+        if(!import_users_data(&patients)) {
+            printf("Error importing data\n");
+        }
+
+        print_main_menu();
+        char op;
+        do {
+            scanf("%c%*c", &op);
+        } while (op < '0' || op > '3');
+        switch (op) {
+            case '1':
+                if(!sign_up(patients)) {
+                    continue;
+                }
+            break;
+            case '2':
+                if(log_in(patients)) {
+                    clrscr();
+                    printf("Logged in\n");
+                }
+            break;
+            case '3':
+                return 0;
+            default:
+                break;
+        }
+        while(log){
             print_menu();
-            break;
-        case '2':
-            if(log_in(patients)) {
-                printf("Logged in\n");
-                print_menu();
+            char op2;
+            do {
+                scanf("%c%*c", &op2);
+            } while (op2 < '0' || op2 > '3');
+            switch (op2) {
+                case '1':
+                    search_speciality(doctors);
+                break;
+                case '2':
+                    print_all_doctors(doctors);
+                break;
+                case '3':
+                    log = false;
+                break;
             }
-            break;
-        //TODO: case 3 if exists
-        case '3':
-
-            break;
-        default:
-            break;
+        }
     }
-
-    //TODO: add functionality here
-    char op2;
-    do {
-        scanf("%c%*c", &op2);
-    } while (op2 < '0' || op2 > '3');
-    switch (op2) {
-        case '1':
-            search_speciality(doctors);
-        break;
-        case '2':
-            print_all_doctors(doctors);
-        break;
-    }
-
-//clearing screen test: all three working on vs code but not clion 😢
-// printf("heelo");
-    // printf("\033[2J\033[H");
-    // system("cls");
-    // clrscr();
-    // printf("hai");
 }
