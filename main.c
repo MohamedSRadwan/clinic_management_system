@@ -12,7 +12,7 @@
 typedef struct doctor {
     char name[CHAR_SIZE];
     char address[CHAR_SIZE];
-    char specialty[CHAR_SIZE];
+    char speciality[CHAR_SIZE];
     char visita[CHAR_SIZE];
 }doctor;
 
@@ -59,7 +59,7 @@ bool import_data(struct doctors *p) {
     for (int i = 0; i < MAX_SIZE; i++) {
         fscanf(fp,
             "%[^\t]\t%[^\t]\t%[^\t]\t%[^\n]%*c",
-            p->arr[i].name, p->arr[i].address, p->arr[i].specialty, p->arr[i].visita);
+            p->arr[i].name, p->arr[i].address, p->arr[i].speciality, p->arr[i].visita);
     }
     fclose(fp);
     return true;
@@ -105,7 +105,7 @@ void print_main_menu() {
 void print_menu() {
 
     printf("enter the number corresponding to the required operation: \n");
-    printf("1. search a specialty\n"
+    printf("1. search a speciality\n"
            "2. view all available doctors\n"
            "3. Log out\n");
 }
@@ -113,7 +113,7 @@ void print_menu() {
 bool available_speciality(char speciality[], struct doctors p) {
     bool correct = false;
     for (int i = 0; i < MAX_SIZE; i++) {
-        if (strcmp(strlwr(p.arr[i].specialty), strlwr(speciality)) == 0) {
+        if (strcmp(strlwr(p.arr[i].speciality), strlwr(speciality)) == 0) {
             correct = true;
         }
     }
@@ -128,14 +128,14 @@ void search_speciality(struct doctors p) {
         if (tried) {
             printf("This speciality is not available.");
         }
-        scanf("%[^\n]%*c", speciality);
-
+        scanf("%49[^\n]%*c", speciality);
+        sanitize_input(speciality);
         tried = true;
     } while(!available_speciality(speciality, p));
     printf("The available doctors for %s: \n", speciality);
 
     for (int i = 0; i < MAX_SIZE; i++) {
-        if(strcmp(strlwr(p.arr[i].specialty), strlwr(speciality)) == 0){
+        if(strcmp(strlwr(p.arr[i].speciality), strlwr(speciality)) == 0){
             printf("%s\t%s\t%s\n", p.arr[i].name, p.arr[i].address, p.arr[i].visita);
         }
     }
@@ -237,6 +237,10 @@ bool sign_up(struct patients p) {
 }
 //DONE: log in
 bool log_in(struct patients p) {
+    if (p.number_of_patients == 0) {
+        printf("no users signed up, sign up first\n");
+        return false;
+    }
     printf("Enter your username: ");
     char username[CHAR_SIZE];
     bool tried = false;
@@ -273,13 +277,13 @@ bool log_in(struct patients p) {
 
 //DONE: printing doctors data
 void print_all_doctors(struct doctors p) {
-    printf("%-30s|%-30s|%-20s|%-15s\n", "doctor name", "address", "specialty", "visita");
+    printf("%-30s|%-30s|%-20s|%-15s\n", "doctor name", "address", "speciality", "visita");
     for (int i = 0; i < MAX_SIZE; i++) {
-        printf("%-30s\t%-30s\t%-20s\t%-15s\n", p.arr[i].name, p.arr[i].address, p.arr[i].specialty, p.arr[i].visita);
+        printf("%-30s\t%-30s\t%-20s\t%-15s\n", p.arr[i].name, p.arr[i].address, p.arr[i].speciality, p.arr[i].visita);
     }
 }
 
-void print_all_patients(struct patients p) {
+void print_all_patients(struct patients p) {//for debugging, not part of code
     for (int i = 0; i < p.number_of_patients; i++) {
         printf("%s\t%s\t%s\n", p.arr[i].name, p.arr[i].username, p.arr[i].password);
     }
@@ -321,10 +325,11 @@ int main() {
                 }
             break;
             case '2':
-                if(log_in(patients)) {
-                    clrscr();
-                    printf("Logged in\n");
+                if(!log_in(patients)) {
+                    sign_up(patients);
                 }
+                printf("Logged in\n");
+
             break;
             case '3':
                 return 0;
