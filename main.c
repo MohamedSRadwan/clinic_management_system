@@ -126,7 +126,7 @@ void search_speciality(struct doctors p) {
     bool tried = false;
     do {
         if (tried) {
-            printf("This speciality is not available.");
+            printf("This speciality is not available, try again: ");
         }
         scanf("%49[^\n]%*c", speciality);
         if (strlen(speciality) == 0) {
@@ -185,14 +185,14 @@ bool sign_up(struct patients p) {
     bool tried = false;
     do {
         if (tried) {
-            printf("your name shouldn't include special characters");
+            printf("your name shouldn't include special characters, try again: ");
         }
-        scanf("%49[^\n]%*c", full_name);
+        scanf("%49[^\n]", full_name);
          if (strlen(full_name) == 0) {
-             printf("1");
              while (getchar() != '\n');
              return false;
          }
+        getchar();
         sanitize_input(full_name);
         tried = true;
     } while (!is_word(full_name));
@@ -206,7 +206,6 @@ bool sign_up(struct patients p) {
         }
         scanf("%49[^\n]%*c", username);
         if (strlen(username) == 0) {
-            printf("2");
             while (getchar() != '\n');
             return false;
         }
@@ -220,7 +219,6 @@ bool sign_up(struct patients p) {
     sanitize_input(password1);
 
     if (strlen(password1) == 0) {
-        printf("3");
         while (getchar() != '\n');
         return false;
     }
@@ -234,7 +232,6 @@ bool sign_up(struct patients p) {
         }
         scanf("%49[^\n]%*c", password2);
         if (strlen(password2) == 0) {
-            printf("4");
             while (getchar() != '\n');
             return false;
         }
