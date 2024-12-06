@@ -73,18 +73,50 @@ void erase_file() {
     fclose(fp);
 }
 
+void strip_l_r(char word[]) {
+
+    int start = 0;
+    while (word[start] != '\0' && isspace(word[start])) {
+        start++;
+    }
+
+    int end = strlen(word) - 1;//from 0 to size - 1
+    while (end >= start && isspace(word[end])) {
+        end--;
+    }
+
+    // shifting
+    int i = 0;
+    for (int j = start; j <= end; j++) {
+        word[i++] = word[j];
+    }
+    word[i] = '\0'; //i is now the last character in array
+}
 
 void sanitize_input(char input[]) {
+    strip_l_r(input);
     int len = strlen(input);
-    for (int i = 0; i < len; i++) {
-        if (input[i] == '\t' || input[i] == '\\') {
-            input[i] = ' ';
+    for (int i = 0; i < len; ) {
+        if (input[i] == '\t' || input[i] == '\\' || isspace(input[i])) {//the last character can't be a tab due to strip
+            for (int j = i; j < len; j++) {
+                input[j] = input[j + 1];
+            }
+            len--;
+        }
+        else {
+            i++;
         }
     }
 }
 
 bool is_word(char word[]) {//the name should be free from special characters
+    strip_l_r(word);
     int len = strlen(word);
+    for (int i = 0; i < len; i++) {
+        if (word[i] == '\t' || word[i] == '\\') {
+            word[i] == ' ';
+        }
+    }
     for (int i = 0; i < len; i++) {
         if (!isalpha(word[i]) && !isspace(word[i])) {
             return false;
@@ -128,14 +160,12 @@ void search_speciality(struct doctors p) {
         if (tried) {
             printf("This speciality is not available, try again: ");
         }
-        scanf("%49[^\n]%*c", speciality);
-        if (strlen(speciality) == 0) {
-            getchar();
-            return;
-        }
+        scanf("%49[^\n]", speciality);
+        while(getchar() != '\n');
+
         sanitize_input(speciality);
         tried = true;
-    } while(!available_speciality(speciality, p));
+    } while(!available_speciality(speciality, p) || strlen(speciality) == 0);
     printf("The available doctors for %s: \n", speciality);
 
     for (int i = 0; i < MAX_SIZE; i++) {
@@ -188,12 +218,10 @@ bool sign_up(struct patients p) {
             printf("your name shouldn't include special characters, try again: ");
         }
         scanf("%49[^\n]", full_name);
+        while(getchar() != '\n');
          if (strlen(full_name) == 0) {
-             while (getchar() != '\n');
              return false;
          }
-        getchar();
-        sanitize_input(full_name);
         tried = true;
     } while (!is_word(full_name));
 
@@ -204,9 +232,9 @@ bool sign_up(struct patients p) {
         if (tried) {
             printf("This username already exists.\n TRY AGAIN: ");
         }
-        scanf("%49[^\n]%*c", username);
+        scanf("%49[^\n]", username);
+        while(getchar() != '\n');
         if (strlen(username) == 0) {
-            while (getchar() != '\n');
             return false;
         }
         sanitize_input(username);
@@ -230,9 +258,9 @@ bool sign_up(struct patients p) {
         if (tried) {
             printf("The two passwords don't match, try again: ");
         }
-        scanf("%49[^\n]%*c", password2);
+        scanf("%49[^\n]", password2);
+        while(getchar() != '\n');
         if (strlen(password2) == 0) {
-            while (getchar() != '\n');
             return false;
         }
         sanitize_input(password2);
@@ -274,8 +302,7 @@ bool log_in(struct patients p) {
             printf("Unable to find this username, make sure it is written correctly: ");
         }
         scanf("%49[^\n]", username);
-        
-        getchar();
+        while (getchar() != '\n');
         sanitize_input(username);
         tried = true;
     } while (!username_exists(username, p) || strlen(username) == 0);
@@ -289,8 +316,8 @@ bool log_in(struct patients p) {
             printf("Wrong password, try again: ");
         }
         scanf("%49[^\n]", password);
-        
-        getchar();
+        while(getchar() != '\n');
+
         sanitize_input(password);
         tried = true;
     } while(!correct_password(username, password, p) || strlen(password) == 0);
