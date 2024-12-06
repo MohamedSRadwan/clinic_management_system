@@ -300,9 +300,7 @@ int main() {
     //erase_file();
     //print_all_patients(patients);
 
-    bool log;
     while(true) {
-        log = true;
 
         struct doctors doctors;
         struct patients patients;
@@ -336,7 +334,7 @@ int main() {
             default:
                 break;
         }
-        while(log){
+        while(true){
             print_menu();
             char op2;
             do {
