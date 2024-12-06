@@ -85,6 +85,9 @@ void sanitize_input(char input[]) {
 
 bool is_word(char word[]) {//the name should be free from special characters
     int len = strlen(word);
+    if (len == 0) {
+        return false;
+    }
     for (int i = 0; i < len; i++) {
         if (!isalpha(word[i]) && !isspace(word[i])) {
             return false;
@@ -129,6 +132,10 @@ void search_speciality(struct doctors p) {
             printf("This speciality is not available.");
         }
         scanf("%49[^\n]%*c", speciality);
+        if (strlen(speciality) == 0) {
+            getchar();
+            return;
+        }
         sanitize_input(speciality);
         tried = true;
     } while(!available_speciality(speciality, p));
@@ -144,6 +151,9 @@ void search_speciality(struct doctors p) {
 //DONE: check if username exists
 bool username_exists(char username[], struct patients p) {
     bool exists = false;
+    if (strlen(username) == 0) {
+        return false;
+    }
     for (int i = 0; i < p.number_of_patients; i++) {
         if (strcmp(p.arr[i].username, username) == 0) {
             exists = true;
@@ -154,6 +164,9 @@ bool username_exists(char username[], struct patients p) {
 //DONE: check if the user's password is correct
 bool correct_password(char username[], char password[], struct patients p) {
     bool correct = false;
+    if (strlen(password) == 0) {
+        return false;
+    }
     for (int i = 0; i < MAX_SIZE; i++) {
         if (strcmp(p.arr[i].username, username) == 0) {
             if (strcmp(p.arr[i].password, password) == 0) {
@@ -181,7 +194,10 @@ bool sign_up(struct patients p) {
             printf("your name shouldn't include special characters");
         }
         scanf("%49[^\n]%*c", full_name);
-
+         if (strlen(full_name) == 0) {
+             getchar();
+             return false;
+         }
         sanitize_input(full_name);
         tried = true;
     } while (!is_word(full_name));
@@ -194,6 +210,10 @@ bool sign_up(struct patients p) {
             printf("This username already exists.\n TRY AGAIN: ");
         }
         scanf("%49[^\n]%*c", username);
+        if (strlen(username) == 0) {
+            getchar();
+            return false;
+        }
         sanitize_input(username);
         tried = true;
     } while (username_exists(username, p));
@@ -202,8 +222,16 @@ bool sign_up(struct patients p) {
     char password1[CHAR_SIZE];
     scanf("%49[^\n]%*c", password1);
     sanitize_input(password1);
+    if (strlen(password1) == 0) {
+        getchar();
+        return false;
+    }
     printf("ReEnter your password: ");
     char password2[CHAR_SIZE];
+    if (strlen(password2) == 0) {
+        getchar();
+        return false;
+    }
     tried = false;
     do {
         if (tried) {
@@ -249,6 +277,10 @@ bool log_in(struct patients p) {
             printf("Unable to find this username, make sure it is written correctly: ");
         }
         scanf("%49[^\n]%*c", username);
+        if (strlen(username) == 0) {
+            getchar();
+            return false;
+        }
         sanitize_input(username);
         tried = true;
     } while (!username_exists(username, p));
@@ -262,6 +294,10 @@ bool log_in(struct patients p) {
             printf("Wrong password, try again: ");
         }
         scanf("%49[^\n]%*c", password);
+        if (strlen(password) == 0) {
+            getchar();
+            return false;
+        }
         sanitize_input(password);
         tried = true;
     } while(!correct_password(username, password, p));
@@ -302,6 +338,7 @@ int main() {
 
     while(true) {
 
+
         struct doctors doctors;
         struct patients patients;
         if(!import_data(&doctors)) {
@@ -313,8 +350,18 @@ int main() {
 
         print_main_menu();
         char op;
+        bool tried = false;
         do {
-            scanf("%c%*c", &op);
+            if(tried) {
+                printf("Enter a correct operation: ");
+            }
+            scanf("%c", &op);
+            if (op == '\n') {
+                tried = true;
+                continue;
+            }
+            while (getchar() != '\n');
+            tried = true;
         } while (op < '0' || op > '3');
         switch (op) {
             case '1':
@@ -337,8 +384,18 @@ int main() {
         while(true){
             print_menu();
             char op2;
+            tried = false;
             do {
-                scanf("%c%*c", &op2);
+                if(tried) {
+                    printf("Enter a correct operation: ");
+                }
+                scanf("%c", &op2);
+                if (op2 == '\n') {
+                    tried = true;
+                    continue;
+                }
+                while (getchar() != '\n');
+                tried = true;
             } while (op2 < '0' || op2 > '3');
             switch (op2) {
                 case '1':
