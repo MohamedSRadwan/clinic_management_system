@@ -85,9 +85,6 @@ void sanitize_input(char input[]) {
 
 bool is_word(char word[]) {//the name should be free from special characters
     int len = strlen(word);
-    if (len == 0) {
-        return false;
-    }
     for (int i = 0; i < len; i++) {
         if (!isalpha(word[i]) && !isspace(word[i])) {
             return false;
@@ -151,9 +148,6 @@ void search_speciality(struct doctors p) {
 //DONE: check if username exists
 bool username_exists(char username[], struct patients p) {
     bool exists = false;
-    if (strlen(username) == 0) {
-        return false;
-    }
     for (int i = 0; i < p.number_of_patients; i++) {
         if (strcmp(p.arr[i].username, username) == 0) {
             exists = true;
@@ -195,7 +189,8 @@ bool sign_up(struct patients p) {
         }
         scanf("%49[^\n]%*c", full_name);
          if (strlen(full_name) == 0) {
-             getchar();
+             printf("1");
+             while (getchar() != '\n');
              return false;
          }
         sanitize_input(full_name);
@@ -211,7 +206,8 @@ bool sign_up(struct patients p) {
         }
         scanf("%49[^\n]%*c", username);
         if (strlen(username) == 0) {
-            getchar();
+            printf("2");
+            while (getchar() != '\n');
             return false;
         }
         sanitize_input(username);
@@ -222,22 +218,26 @@ bool sign_up(struct patients p) {
     char password1[CHAR_SIZE];
     scanf("%49[^\n]%*c", password1);
     sanitize_input(password1);
+
     if (strlen(password1) == 0) {
-        getchar();
+        printf("3");
+        while (getchar() != '\n');
         return false;
     }
     printf("ReEnter your password: ");
     char password2[CHAR_SIZE];
-    if (strlen(password2) == 0) {
-        getchar();
-        return false;
-    }
+
     tried = false;
     do {
         if (tried) {
             printf("The two passwords don't match, try again: ");
         }
         scanf("%49[^\n]%*c", password2);
+        if (strlen(password2) == 0) {
+            printf("4");
+            while (getchar() != '\n');
+            return false;
+        }
         sanitize_input(password2);
         tried = true;
     } while (strcmp(password1, password2) != 0);
@@ -326,11 +326,6 @@ void print_all_patients(struct patients p) {//for debugging, not part of code
 }
 
 
-//clear screen function
-void clrscr()
-{
-    system("cls||clear");
-}
 
 int main() {
     //erase_file();
@@ -341,6 +336,7 @@ int main() {
 
         struct doctors doctors;
         struct patients patients;
+
         if(!import_data(&doctors)) {
             printf("Error importing data\n");
         }
@@ -368,6 +364,7 @@ int main() {
                 if(!sign_up(patients)) {
                     continue;
                 }
+            //while (getchar() != '\n');
             break;
             case '2':
                 if(!log_in(patients)) {
@@ -381,10 +378,12 @@ int main() {
             default:
                 break;
         }
+
         while(true){
             print_menu();
             char op2;
             tried = false;
+
             do {
                 if(tried) {
                     printf("Enter a correct operation: ");
