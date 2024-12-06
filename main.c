@@ -350,8 +350,7 @@ int main() {
                     print_all_doctors(doctors);
                 break;
                 case '3':
-                    log = false;
-                break;
+                    return 0;
             }
         }
     }
