@@ -136,7 +136,7 @@ void search_speciality(struct doctors p) {
 
     for (int i = 0; i < MAX_SIZE; i++) {
         if(strcmp(strlwr(p.arr[i].speciality), strlwr(speciality)) == 0){
-            printf("%s\t%s\t%s\n", p.arr[i].name, p.arr[i].address, p.arr[i].visita);
+            printf("%-25s\t%-40s\t%-15s\n", p.arr[i].name, p.arr[i].address, p.arr[i].visita);
         }
     }
 }
