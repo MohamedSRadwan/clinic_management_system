@@ -277,9 +277,9 @@ bool log_in(struct patients p) {
 
 //DONE: printing doctors data
 void print_all_doctors(struct doctors p) {
-    printf("%-30s|%-30s|%-20s|%-15s\n", "doctor name", "address", "speciality", "visita");
+    printf("%-25s\t|%-40s\t|%-20s\t|%-15s\n", "doctor name", "address", "speciality", "visita");
     for (int i = 0; i < MAX_SIZE; i++) {
-        printf("%-30s\t%-30s\t%-20s\t%-15s\n", p.arr[i].name, p.arr[i].address, p.arr[i].speciality, p.arr[i].visita);
+        printf("%-25s\t%-40s\t%-20s\t%-15s\n", p.arr[i].name, p.arr[i].address, p.arr[i].speciality, p.arr[i].visita);
     }
 }
 
