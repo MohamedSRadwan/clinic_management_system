@@ -273,14 +273,12 @@ bool log_in(struct patients p) {
         if (tried) {
             printf("Unable to find this username, make sure it is written correctly: ");
         }
-        scanf("%49[^\n]%*c", username);
-        if (strlen(username) == 0) {
-            getchar();
-            return false;
-        }
+        scanf("%49[^\n]", username);
+        
+        getchar();
         sanitize_input(username);
         tried = true;
-    } while (!username_exists(username, p));
+    } while (!username_exists(username, p) || strlen(username) == 0);
 
 
     printf("Enter your password: ");
@@ -290,14 +288,12 @@ bool log_in(struct patients p) {
         if (tried) {
             printf("Wrong password, try again: ");
         }
-        scanf("%49[^\n]%*c", password);
-        if (strlen(password) == 0) {
-            getchar();
-            return false;
-        }
+        scanf("%49[^\n]", password);
+        
+        getchar();
         sanitize_input(password);
         tried = true;
-    } while(!correct_password(username, password, p));
+    } while(!correct_password(username, password, p) || strlen(password) == 0);
 
     //check if username exists: done while taking input
 
